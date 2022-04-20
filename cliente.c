@@ -158,7 +158,7 @@ int main(int argc, char**argv){
 	freeaddrinfo(serverinfo);
 
 	//Envio longitud del username
-	sprintf(buffer,"%d",strlen(argv[1]));
+	sprintf(buffer,"%ld",strlen(argv[1]));
 	write(sdout,buffer,strlen(buffer));
 	usleep(50);
 	//Envio username
