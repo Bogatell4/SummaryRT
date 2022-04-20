@@ -61,14 +61,17 @@ void *getmsg(){
 //REBRE MSG I ESCRIURE
 void *read_print(void *x){
 	int *sdin=(int*)x;
-	char username[32];
+	char *username;
+	char usrlen[16];
 	char buffer[50];
 	char buffer2[256];//fer realoc
 	char len[256];
 	char *miss;
 	int l,i=0;
 	while(i<100){
-		read(*sdin,username,32);
+		read(*sdin,usrlen,16);
+		username=(char*)malloc(atoi(usrlen));
+		read(*sdin,username,atoi(usrlen));
 		sprintf(buffer,"<%s>: ",username);
 		write(1,buffer,strlen(buffer));
 		read(*sdin,len,256);
@@ -114,20 +117,19 @@ int main(int argc, char**argv){
 	hand.sa_handler=int_handler;
 	sigaction(SIGUSR1,&hand,NULL);
 
-	char username[32];
 	char *username ;
 	char IP[128];
 	char portin[10];
 	char portout[10];	
-	username=(char*)malloc(sizeof(argv[1]));
+	username=(char*)malloc(strlen(argv[1]));
 	strcpy(username,argv[1]);
 	/*strcpy(IP,argv[2]);
 	strcpy(portin,argv[3]);
 	strcpy(portout,argv[4]);
 	*/
 	char IP2[128]="0.0.0.0";
-	char portin2[10]="12002";
-	char portout2[10]="11002";
+	char portin2[10]="12007";
+	char portout2[10]="11007";
 	strcpy(IP,IP2);
 	strcpy(portin,portin2);
 	strcpy(portout,portout2);
@@ -190,7 +192,7 @@ int main(int argc, char**argv){
 	freeaddrinfo(serverinfo);
 
 	//Envio longitud del username
-	sprintf(buffer,"%ld",strlen(argv[1]));
+	sprintf(buffer,"%ld",strlen(username));
 	write(sdout,buffer,strlen(buffer));
 	usleep(50);
 	//Envio username

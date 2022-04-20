@@ -106,20 +106,20 @@ void *read_write (void *asdf){
 		read(cliente->fd_toserver,len,32);
 		sprintf(buffer2,"missatge rebut!!\n");
 		write(1,buffer2,strlen(buffer2));
-		/* COMPROVACIONS
+		//COMPROVACIONS
 		sprintf(buffer2,"len=%s\n",len);
 		write(1,buffer2,strlen(buffer2));
 		sprintf(buffer2,"%s said:",cliente->username);
 		write(1,buffer2,strlen(buffer2));
-		*/
+		
 		//Posem mida missatge
 		txt=(char*)malloc(atoi(len));
 		read(cliente->fd_toserver,txt,atoi(len));
-		//write(1,txt,atoi(len));
+		write(1,txt,atoi(len));
 		pthread_mutex_lock(&critical);
 		while(clientes[i].fd_toserver!=0){
 			if(clientes[i].fd_toclient != cliente->fd_toclient){
-				
+				usleep(25);
 				write(clientes[i].fd_toclient,cliente->userlen,strlen(cliente->userlen));
 				usleep(25);
 				write(clientes[i].fd_toclient,cliente->username,atoi(cliente->userlen));
@@ -152,8 +152,8 @@ int main(int argc, char**argv)
 	sprintf(buffer,"segon port %d \n",atoi(argv[2]));
 	write(1,buffer,strlen(buffer));
 	*/
-	int portin=11002;
-	int portout=12002;
+	int portin=11007;
+	int portout=12007;
 
 	//Creacio cosetes de signals
 	struct sigaction hand;
@@ -221,7 +221,7 @@ int main(int argc, char**argv)
 				//Assigna mida a username
 				clientes[j].username=(char*)malloc(atoi(clientes[j].userlen));
 				//Rep Username
-				read(in,clientes[j].username,sizeof(clientes[j].username));
+				read(in,clientes[j].username,atoi(clientes[j].userlen));
 				clientes[j].fd_toclient=out;
 				clientes[j].fd_toserver=in;
 				sprintf(buffer,"Creating thread...\n");
