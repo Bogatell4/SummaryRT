@@ -12,8 +12,10 @@
 #include <sys/un.h>
 #include <netinet/in.h>
 #include <pthread.h>
+#include <signal.h>
 
 char buffer[256];
+int sdout,sdin;
 
 struct cliente{
 	char username[32];
@@ -28,6 +30,30 @@ struct missatge{
 	int len;
 	char *txt;
 };
+
+//Handler que s'executa al rebre SIGUSR2
+void int_handler(){
+	char buffer[256];
+	int i=0;
+	sprintf(buffer,"SIGUSR2 recieved Closing sockets...\n");
+	write(1,buffer,strlen(buffer));
+
+	//Recorre tot vector de clientes xapant els sockets
+	while(clientes[i].fd_toserver!=0){
+		close(clientes[i].fd_toserver);
+		close(clientes[i].fd_toclient);
+	}
+	sprintf(buffer,"All clients closed\n");
+	write(1,buffer,strlen(buffer));
+
+	//Xapa sockets del server i finalitza
+	close(sdin);
+	close(sdout);
+	sprintf(buffer,"Server Sockets closed\n");
+	write(1,buffer,strlen(buffer));
+	exit(0);
+}
+
 
 int createsocket(int port, struct sockaddr_in address){
 	int x;
@@ -106,7 +132,6 @@ void *read_write (void *asdf){
 
 int main(int argc, char**argv)
 {
-
 	//Llegir els 2 ports per teclat
 	if (argc!=1){
 		sprintf(buffer,"ERROR input params\n");
@@ -124,9 +149,18 @@ int main(int argc, char**argv)
 	int portin=11002;
 	int portout=12002;
 
+	//Creacio cosetes de signals
+	struct sigaction hand;
+	sigset_t mask;
+	sigemptyset (&mask);
+	hand.sa_mask=mask;
+	hand.sa_flags=0;
+	hand.sa_handler=int_handler;
+	sigaction(SIGUSR2,&hand,NULL);
+
 	//Creacio de les adreces pels 2 sockets: addresin i addresout
 	int sAddrLen;
-	int sdin,sdout,j=0,in,out;
+	int j=0,in,out;
 	pthread_t id[100];
 	struct sockaddr_in addressin, addressout, retSin;
 	memset(&addressin,0,sizeof(addressin));

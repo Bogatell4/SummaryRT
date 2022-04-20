@@ -12,6 +12,11 @@
 #include <sys/un.h>
 #include <netinet/in.h>
 #include <pthread.h>
+#include <signal.h>
+
+
+int sdin;
+int sdout;
 
 char buffer[256];
 char longbuffer[1024];
@@ -77,13 +82,38 @@ void *read_print(void *x){
 	}
 }
 
+
+//Handler que s'executa al rebre SIGUSR1
+void int_handler(){
+	char buffer[256];
+	sprintf(buffer,"SIGUSR1 recieved\n");
+	write(1,buffer,strlen(buffer));
+	close(sdout);
+	close(sdin);
+	sprintf(buffer,"Client Terminated\n");
+	write(1,buffer,strlen(buffer));
+	exit(0);
+}
+
+
 int main(int argc, char**argv){
+	char buffer[256];
 	//Llegir username IP i ports pel teclat
 	if (argc!=2){
 		sprintf(buffer,"ERROR input params\n");
 		write(1,buffer,strlen(buffer));
 		return 0;
 	}
+
+	//Creacio cosetes de signals
+	struct sigaction hand;
+	sigset_t mask;
+	sigemptyset (&mask);
+	hand.sa_mask=mask;
+	hand.sa_flags=0;
+	hand.sa_handler=int_handler;
+	sigaction(SIGUSR1,&hand,NULL);
+
 	char username[32];
 	char IP[128];
 	char portin[10];
@@ -103,7 +133,7 @@ int main(int argc, char**argv){
 	write(1,buffer,strlen(buffer));
 
 	//Creació dels 2 sockets
-	int sdin = socket(AF_INET,SOCK_STREAM,0);
+	sdin = socket(AF_INET,SOCK_STREAM,0);
 	if (sdin == -1) {
 		sprintf(buffer,"ERROR IN s.creation\n");
 		write(1,buffer,strlen(buffer));
@@ -112,7 +142,7 @@ int main(int argc, char**argv){
 		sprintf(buffer,"OK IN s.creation\n");
 		write(1,buffer,strlen(buffer));
 	}
-	int sdout = socket(AF_INET,SOCK_STREAM,0);
+	sdout = socket(AF_INET,SOCK_STREAM,0);
 	if (sdout == -1) {
 		sprintf(buffer,"ERROR OUT s.creation\n");
 		write(1,buffer,strlen(buffer));
