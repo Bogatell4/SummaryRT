@@ -67,7 +67,7 @@ void *read_print(void *x){
 	char len[16];
 	char *miss;
 	int l,i=0;
-	while(i<100){
+	while(1){
 		//Rep allargada del username, li dona mida i el rep
 		read(*sdin,usrlen,16);
 		username=(char*)malloc(atoi(usrlen));
