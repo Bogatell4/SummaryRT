@@ -48,12 +48,12 @@ void *getmsg(){
 	}
 	msg[i]='\0';
 	mis1->len=i+1;
-	mis1->txt=(char*)realloc(mis1->txt,sizeof(msg)); 
+	mis1->txt=(char*)realloc(mis1->txt,mis1->len); 
 	strcpy(mis1->txt,msg);
-	sprintf(buffer,"len=%d\n",mis1->len);
+	/*sprintf(buffer,"len=%d\n",mis1->len);
 	write(1,buffer,strlen(buffer));
 	sprintf(buffer,"txt=%s",mis1->txt);
-	write(1,buffer,strlen(buffer));
+	write(1,buffer,strlen(buffer));*/
 	free(msg);
 	return(mis1);
 }
@@ -81,6 +81,7 @@ void *read_print(void *x){
 		write(1,miss,strlen(miss));
 		free(miss);
 		memset(username,0,sizeof(username));
+		free(username);
 		i++;
 	}
 }
@@ -91,6 +92,8 @@ void int_handler(){
 	char buffer[256];
 	sprintf(buffer,"SIGUSR1 recieved\n");
 	write(1,buffer,strlen(buffer));
+	shutdown(sdout,1);
+	shutdown(sdin,0);
 	close(sdout);
 	close(sdin);
 	sprintf(buffer,"Client Terminated\n");
@@ -128,8 +131,8 @@ int main(int argc, char**argv){
 	strcpy(portout,argv[4]);
 	*/
 	char IP2[128]="0.0.0.0";
-	char portin2[10]="12007";
-	char portout2[10]="11007";
+	char portin2[10]="12005";
+	char portout2[10]="11005";
 	strcpy(IP,IP2);
 	strcpy(portin,portin2);
 	strcpy(portout,portout2);
@@ -208,8 +211,8 @@ int main(int argc, char**argv){
 		missatge=getmsg();
 		sprintf(buffer,"%d",missatge->len);
 		write(sdout,buffer,strlen(buffer));
-		sprintf(buffer,"lenbuffer sdout=%ld\n",strlen(buffer)+1);
-		write(1,buffer,strlen(buffer));
+		/*sprintf(buffer,"lenbuffer sdout=%ld\n",strlen(buffer)+1);
+		write(1,buffer,strlen(buffer));*/
 		usleep(50);
 		write(sdout,missatge->txt,missatge->len);
 		free(missatge);

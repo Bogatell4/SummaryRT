@@ -41,13 +41,18 @@ void int_handler(){
 
 	//Recorre tot vector de clientes xapant els sockets
 	while(clientes[i].fd_toserver!=0){
+		shutdown(clientes[i].fd_toserver,0);
+		shutdown(clientes[i].fd_toclient,1);
 		close(clientes[i].fd_toserver);
 		close(clientes[i].fd_toclient);
+
 	}
 	sprintf(buffer,"All clients closed\n");
 	write(1,buffer,strlen(buffer));
 
 	//Xapa sockets del server i finalitza
+	shutdown(sdin,0);
+	shutdown(sdout,1);
 	close(sdin);
 	close(sdout);
 	sprintf(buffer,"Server Sockets closed\n");
@@ -152,8 +157,8 @@ int main(int argc, char**argv)
 	sprintf(buffer,"segon port %d \n",atoi(argv[2]));
 	write(1,buffer,strlen(buffer));
 	*/
-	int portin=11007;
-	int portout=12007;
+	int portin=11005;
+	int portout=12005;
 
 	//Creacio cosetes de signals
 	struct sigaction hand;
