@@ -17,9 +17,7 @@
 
 int sdin;
 int sdout;
-
-char buffer[256];
-char longbuffer[1024];
+//char buffer[256];
 struct missatge{
 	int len;
 	char *txt;
@@ -44,16 +42,18 @@ void *getmsg(){
 			a++;
 			msg= (char *) realloc(msg,32*a+1);	
 		}
-
 	}
 	msg[i]='\0';
 	mis1->len=i+1;
 	mis1->txt=(char*)realloc(mis1->txt,mis1->len); 
 	strcpy(mis1->txt,msg);
+
+	//Comprobacions
 	/*sprintf(buffer,"len=%d\n",mis1->len);
 	write(1,buffer,strlen(buffer));
 	sprintf(buffer,"txt=%s",mis1->txt);
 	write(1,buffer,strlen(buffer));*/
+
 	free(msg);
 	return(mis1);
 }
@@ -64,20 +64,27 @@ void *read_print(void *x){
 	char *username;
 	char usrlen[16];
 	char buffer[50];
-	char buffer2[256];//fer realoc
-	char len[256];
+	char len[16];
 	char *miss;
 	int l,i=0;
 	while(i<100){
+		//Rep allargada del username, li dona mida i el rep
 		read(*sdin,usrlen,16);
 		username=(char*)malloc(atoi(usrlen));
 		read(*sdin,username,atoi(usrlen));
+	
+		//Comprovacions
+		/*
 		sprintf(buffer,"<%s>: ",username);
 		write(1,buffer,strlen(buffer));
-		read(*sdin,len,256);
+		*/
+		
+		//Rep len de text, marca mida i rep text
+		read(*sdin,len,16);
 		miss=(char*)malloc(atoi(len));
 		read(*sdin,miss,atoi(len));
-		//sprintf(buffer2,"%s\n",miss);
+
+		//Escriu text i allibera memoria
 		write(1,miss,strlen(miss));
 		free(miss);
 		memset(username,0,sizeof(username));
@@ -120,6 +127,8 @@ int main(int argc, char**argv){
 	hand.sa_handler=int_handler;
 	sigaction(SIGUSR1,&hand,NULL);
 
+
+	//Llegim username IP i PORTS
 	char *username ;
 	char IP[128];
 	char portin[10];
@@ -139,7 +148,7 @@ int main(int argc, char**argv){
 	sprintf(buffer,"Username:%s -- IP: %s -- IN: %s -- OUT: %s \n",username, IP,portin,portout);
 	write(1,buffer,strlen(buffer));
 
-	//Creació dels 2 sockets
+	//Creació dels 2 SOCKETS
 	sdin = socket(AF_INET,SOCK_STREAM,0);
 	if (sdin == -1) {
 		sprintf(buffer,"ERROR IN s.creation\n");
@@ -159,6 +168,8 @@ int main(int argc, char**argv){
 		write(1,buffer,strlen(buffer));
 	}
 
+
+	//Connecció de SOCKETS
 	struct addrinfo hints,*serverinfo,*p;
 	int rvin,rvout;
 	
@@ -200,10 +211,14 @@ int main(int argc, char**argv){
 	usleep(50);
 	//Envio username
 	write(sdout,username,strlen(username));
+	
+	//Creació thread llegir
 	pthread_t id;
 	pthread_create(&id,NULL,read_print,(void*)&sdin);
 	sprintf(buffer,"thread llegir server creat\n");
 	write(1,buffer,strlen(buffer));
+
+	//Creació thread escriure
 	struct missatge *missatge;
 	sprintf(buffer,"Entrant bucle escriure teclat\n");
 	write(1,buffer,strlen(buffer));

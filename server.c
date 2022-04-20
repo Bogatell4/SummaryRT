@@ -60,7 +60,7 @@ void int_handler(){
 	exit(0);
 }
 
-
+//CREACCIÓ DE SOCKETS INICIALS
 int createsocket(int port, struct sockaddr_in address){
 	int x;
 
@@ -141,8 +141,7 @@ void *read_write (void *asdf){
 	}
 }
 
-int main(int argc, char**argv)
-{
+int main(int argc, char**argv){
 	//Llegir els 2 ports per teclat
 	if (argc!=1){
 		sprintf(buffer,"ERROR input params\n");
@@ -227,10 +226,12 @@ int main(int argc, char**argv)
 				clientes[j].username=(char*)malloc(atoi(clientes[j].userlen));
 				//Rep Username
 				read(in,clientes[j].username,atoi(clientes[j].userlen));
+				//Assignem fd
 				clientes[j].fd_toclient=out;
 				clientes[j].fd_toserver=in;
 				sprintf(buffer,"Creating thread...\n");
 				write(1,buffer,strlen(buffer));
+				//Crea thread read-write 
 				pthread_create(&id[j],NULL,read_write,(void *)&clientes[j]);
 				pthread_mutex_unlock(&critical);
 				j++;
