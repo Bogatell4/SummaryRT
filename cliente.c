@@ -72,6 +72,7 @@ void *read_print(void *x){
 		//sprintf(buffer2,"%s\n",miss);
 		write(1,miss,strlen(miss));
 		free(miss);
+		memset(username,0,sizeof(username));
 		i++;
 	}
 }
@@ -171,7 +172,7 @@ int main(int argc, char**argv){
 		write(sdout,buffer,strlen(buffer));
 		sprintf(buffer,"lenbuffer sdout=%ld\n",strlen(buffer)+1);
 		write(1,buffer,strlen(buffer));
-		sleep(1);
+		usleep(50);
 		write(sdout,missatge->txt,missatge->len);
 		free(missatge);
 	}

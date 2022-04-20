@@ -91,9 +91,9 @@ void *read_write (void *asdf){
 		while(clientes[i].fd_toserver!=0){
 			if(clientes[i].fd_toclient != cliente->fd_toclient){
 				write(clientes[i].fd_toclient,cliente->username,strlen(cliente->username));
-				sleep(1);
+				usleep(25);
 				write(clientes[i].fd_toclient,len,256);
-				sleep(1);
+				usleep(25);
 				write(clientes[i].fd_toclient,txt,atoi(len));
 			}
 			i++;
