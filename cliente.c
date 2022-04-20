@@ -115,9 +115,11 @@ int main(int argc, char**argv){
 	sigaction(SIGUSR1,&hand,NULL);
 
 	char username[32];
+	char *username ;
 	char IP[128];
 	char portin[10];
-	char portout[10];
+	char portout[10];	
+	username=(char*)malloc(sizeof(argv[1]));
 	strcpy(username,argv[1]);
 	/*strcpy(IP,argv[2]);
 	strcpy(portin,argv[3]);
@@ -187,8 +189,12 @@ int main(int argc, char**argv){
 	}
 	freeaddrinfo(serverinfo);
 
+	//Envio longitud del username
+	sprintf(buffer,"%ld",strlen(argv[1]));
+	write(sdout,buffer,strlen(buffer));
+	usleep(50);
+	//Envio username
 	write(sdout,username,strlen(username));
-
 	pthread_t id;
 	pthread_create(&id,NULL,read_print,(void*)&sdin);
 	sprintf(buffer,"thread llegir server creat\n");

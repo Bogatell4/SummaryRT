@@ -18,9 +18,10 @@ char buffer[256];
 int sdout,sdin;
 
 struct cliente{
-	char username[32];
+	char *username;
 	int fd_toserver;
 	int fd_toclient;
+	char userlen[16];
 };
 
 struct cliente clientes[100];
@@ -96,29 +97,34 @@ void *read_write (void *asdf){
 	cliente=(struct cliente*)asdf;
 	int i=0;
 	char *txt;
-	char len[256];
+	char len[32];
 	char buffer2[270];
 	sprintf(buffer2,"Thread username: %s Born\n",cliente->username);
 	write(1,buffer2,strlen(buffer2));
 	while(1){
-		read(cliente->fd_toserver,len,256);
+		//Rep longitud missatge
+		read(cliente->fd_toserver,len,32);
 		sprintf(buffer2,"missatge rebut!!\n");
 		write(1,buffer2,strlen(buffer2));
-		
+		/* COMPROVACIONS
 		sprintf(buffer2,"len=%s\n",len);
 		write(1,buffer2,strlen(buffer2));
 		sprintf(buffer2,"%s said:",cliente->username);
 		write(1,buffer2,strlen(buffer2));
+		*/
+		//Posem mida missatge
 		txt=(char*)malloc(atoi(len));
 		read(cliente->fd_toserver,txt,atoi(len));
-
-		write(1,txt,atoi(len));
+		//write(1,txt,atoi(len));
 		pthread_mutex_lock(&critical);
 		while(clientes[i].fd_toserver!=0){
 			if(clientes[i].fd_toclient != cliente->fd_toclient){
-				write(clientes[i].fd_toclient,cliente->username,strlen(cliente->username));
+				
+				write(clientes[i].fd_toclient,cliente->userlen,strlen(cliente->userlen));
 				usleep(25);
-				write(clientes[i].fd_toclient,len,256);
+				write(clientes[i].fd_toclient,cliente->username,atoi(cliente->userlen));
+				usleep(25);
+				write(clientes[i].fd_toclient,len,32);
 				usleep(25);
 				write(clientes[i].fd_toclient,txt,atoi(len));
 			}
@@ -209,7 +215,13 @@ int main(int argc, char**argv)
 				sprintf(buffer,"Accepted OUT:\n");
 				write(1,buffer,strlen(buffer));
 				pthread_mutex_lock(&critical);
-				read(in,clientes[j].username,32);
+
+				//Rep mida UserName
+				read(in,clientes[j].userlen,16);
+				//Assigna mida a username
+				clientes[j].username=(char*)malloc(atoi(clientes[j].userlen));
+				//Rep Username
+				read(in,clientes[j].username,sizeof(clientes[j].username));
 				clientes[j].fd_toclient=out;
 				clientes[j].fd_toserver=in;
 				sprintf(buffer,"Creating thread...\n");
